@@ -5,7 +5,7 @@ This plugin adds a map for showing hate crimes to Wordpress and depends on [Word
 
 The map is based on [Leaflet](http://leafletjs.com/) and includes a filter system for showing hate crimes related to a certain category.
 
-It's also possible to show the map without Wordpress using the included index.html file and making reference to a custom json data source.
+It's also possible to show the map without Wordpress using the included index.html file and making reference to a custom [json data source](https://raw.githubusercontent.com/geraldo/hatecrimes-child/master/hatecrimes.js).
 
 See related resources:
   1. [Wordpress plugin for mapping hate crimes: Custom post type Hate Crime](https://github.com/geraldo/hatecrimes)
