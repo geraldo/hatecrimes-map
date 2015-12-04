@@ -1,27 +1,29 @@
 var categories = [];
 var markers = new L.MarkerClusterGroup({spiderfyDistanceMultiplier: 2.2, maxClusterRadius: 40, disableClusteringAtZoom: 12});
 var markers2 = new L.LayerGroup();
-var colors = {"Antisemitismo": "#874321", "Aporofobia": "#80a51f", "Homofobia": "#5e457b", "Intolerancia criminal": "#4cbb81", "Islamofobia": "#b5bb83", "Disfobia": "#fab909", "Odio ideológico": "#ee229c", "Racismo, xenofobia": "#761c2c", "Romafobia": "#2f2d66", "Transfobia": "#273d08", "Violencia ultra fútbol": "#941a59"};
+var colors = {"antisemitismo": "#874321", "aporofobia": "#80a51f", "homofobia": "#5e457b", "intolerancia-criminal": "#4cbb81", "islamofobia": "#b5bb83", "disfobia": "#fab909", "odioideologico": "#ee229c", "racismoxenofobia": "#761c2c", "romafobia": "#2f2d66", "transfobia": "#273d08", "futbol": "#941a59"};
+var id = 'gkogler.l91ko9dl';
+var token = 'pk.eyJ1IjoiZ2tvZ2xlciIsImEiOiJSQ1Nld2NrIn0.yW2DR2Lp2NS1xPJsOddW9Q';
 
 /* main map */
 var map = L.map('map').setView([40.0758302,-1], 6);
 map.once('focus', function() { map.scrollWheelZoom.enable(); });
 
 L.tileLayer('https://{s}.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={token}', {
-	minZoom: 6,
+	minZoom: 5,
 	maxZoom: 18,
-	id: 'gkogler.l91ko9dl',
-	token: 'pk.eyJ1IjoiZ2tvZ2xlciIsImEiOiJSQ1Nld2NrIn0.yW2DR2Lp2NS1xPJsOddW9Q'
+	id: id,
+	token: token
 }).addTo(this.map);
 
 /* canary island map */
-var map2 = L.map('map2', { zoomControl:false }).setView([28.1, -15.4], 6);
+var map2 = L.map('map2', { zoomControl:false }).setView([28.1, -15.4], 5);
 
 L.tileLayer('https://{s}.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={token}', {
-	maxZoom: 6,
-	minZoom: 6,
-	id: 'gkogler.l91ko9dl',
-	token: 'pk.eyJ1IjoiZ2tvZ2xlciIsImEiOiJSQ1Nld2NrIn0.yW2DR2Lp2NS1xPJsOddW9Q'
+	maxZoom: 5,
+	minZoom: 5,
+	id: id,
+	token: token
 }).addTo(this.map2);
 
 // Fetch, process and display geoJSON.
@@ -51,14 +53,15 @@ function loadRegisters(json) {
 
 		// load categoria object
 		var catTitle = register.category.trim().split(",");
-		var cat;
+		var catSlug = register.catSlug.trim().split(",");
+		var cats = new Array();
 
-		if( Object.prototype.toString.call( catTitle ) === '[object Array]' ) {
-		    catTitle.forEach(function (category, index) {
-		    	cat = registerCategory(category.trim());
+		if( Object.prototype.toString.call( catSlug ) === '[object Array]' ) {
+		    catSlug.forEach(function (category, index) {
+		    	cats.push(registerCategory(catTitle[index].trim(), category.trim()));
 		    });
 		} else {
-			cat = registerCategory(catTitle);
+			cats.push(registerCategory(catTitle.trim(), catSlug.trim()));
 		}
 
 		//create marker for register
@@ -88,10 +91,12 @@ function loadRegisters(json) {
 				title: register.title
 			});
 			marker.bindPopup(popupText);
-			console.log("Add register "+register.title);
+			//console.log("Add register ", register);
 
 			// save marker to layers
-			cat.layer.addLayer(marker);
+			cats.forEach(function (category, index) {
+				category.layer.addLayer(marker);
+			});
 			markers.addLayer(marker);
 
 			// canary islands
@@ -108,7 +113,7 @@ function loadRegisters(json) {
 					fillOpacity: 0.8
 				});*/
 				var marker = L.marker(new L.LatLng( register.latitude, register.longitude ), {
-					icon: cat.icon,
+					icon: cats[0].icon,
 					title: register.title
 				});
 				marker.bindPopup(popupText);
@@ -136,28 +141,29 @@ function getRandomColor() {
 // get category object by category name
 function getCat(cat) {
     for (var i = 0, len = categories.length; i < len; i++) {
-        if (categories[i].title === cat)
+        if (categories[i].slug === cat)
             return categories[i];
     }
     return null;
 }
 
-function registerCategory(catTitle) {
-	cat = getCat(catTitle);
+function registerCategory(catTitle, catSlug) {
+	cat = getCat(catSlug);
 
 	if (cat == null) {
 		//create new category
-		console.log("Add category "+catTitle);
+		//console.log("Add category: "+catTitle+" ["+catSlug+"]");
 		cat = {
 			title: catTitle,
-			color: colors[catTitle],
+			slug: catSlug,
+			color: colors[catSlug],
 			layer: new L.LayerGroup(),
 			icon: new L.icon({
-				iconUrl: '/wp-content/plugins/hatecrimes-map/images/'+catTitle+'.png',
+				iconUrl: '/wp-content/plugins/hatecrimes-map/images/'+catSlug+'.png',
 				iconSize:     [24, 32],
 				iconAnchor:   [12, 16],
 				popupAnchor:  [0, -16],
-				color: colors[catTitle]
+				color: colors[catSlug]
 			})
 		};
 		categories.push(cat);
@@ -166,36 +172,15 @@ function registerCategory(catTitle) {
 	return cat;
 }
 
-function isNumber(n) {
-	return !isNaN(parseFloat(n)) && isFinite(n);
-}
-
-var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+jQuery/g;
-String.prototype.trim = function() {
-	return this.replace(rtrim, '');
-};
-
 /**************
  filter 
  **************/
 function initFilter() {
-	//jQuerycategories = get_terms( "type", "hatecrime" );
-	/*var categories = {
-		antisemitismo: { title: "Antisemitismo" },
-		aporofobia: { title: "Aporofobia" },
-		futbol: { title: "Futbol" },
-		homofobia: { title: "Homofobia" },
-		islamofobia: { title: "Islamofobia" },
-		minusvalido: { title: "Minusvalido" },
-		odioideologico: { title: "Odio ideológico" },
-		racismoxenofobia: { title: "Racismo/Xenofobia" },
-		romafobia: { title: "Romafobia" },
-		transfobia: { title: "Transfobia" }
-	}*/
+	//categories.sortOn("title");
+	categories.sort(sortOn("title"));
 
 	categories.forEach(function(cat, i){
-		console.log("Add category "+cat.title);
-		jQuery('#filter').append('<input class="cb cb-cat" id="cb-cat-'+cat.id+'" type="checkbox" value="'+cat.title+'" checked="checked"><span style="color:#fff;background-color:'+cat.color+'">'+cat.title+'</span></br>');
+		jQuery('#filter').append('<input class="cb cb-cat" id="cb-cat-'+cat.id+'" type="checkbox" value="'+cat.slug+'" checked="checked"><span style="color:#fff;background-color:'+cat.color+'">'+cat.title+'</span></br>');
 	});
 
 	//add feminicidio & antisemitismo
@@ -241,12 +226,46 @@ function showNone() {
 
 // show only this category
 function showCat(cats) {
+	console.log("show cats:", cats, categories);
 	markers.clearLayers();
 	cats.forEach(function(cat,i){
 		categories.forEach(function(obj,j){
-			if (obj.title === cat) {
+			//console.log(obj.slug, cat);
+			if (obj.slug === cat) {
 				markers.addLayer(obj.layer);
 			}
 		});
 	});
+}
+
+/**************
+ help functions 
+ **************/
+function isNumber(n) {
+	return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+jQuery/g;
+String.prototype.trim = function() {
+	return this.replace(rtrim, '');
+}
+
+// http://stackoverflow.com/questions/16648076/sort-array-on-key-value#16648532
+/*Array.prototype.sortOn = function(key){
+    this.sort(function(a, b){
+        if(a[key] < b[key]){
+            return -1;
+        }else if(a[key] > b[key]){
+            return 1;
+        }
+        return 0;
+    });
+}*/
+
+function sortOn(key) {
+  return function(a,b){
+   if (a[key] > b[key]) return 1;
+   if (a[key] < b[key]) return -1;
+   return 0;
+  }
 }
