@@ -4,6 +4,7 @@ var markers2 = new L.LayerGroup();
 var colors = {"antisemitismo": "#874321", "aporofobia": "#80a51f", "homofobia": "#5e457b", "intolerancia-criminal": "#4cbb81", "islamofobia": "#b5bb83", "disfobia": "#fab909", "odioideologico": "#ee229c", "racismoxenofobia": "#761c2c", "romafobia": "#2f2d66", "transfobia": "#273d08", "futbol": "#941a59"};
 var id = 'gkogler.l91ko9dl';
 var token = 'pk.eyJ1IjoiZ2tvZ2xlciIsImEiOiJSQ1Nld2NrIn0.yW2DR2Lp2NS1xPJsOddW9Q';
+var lang = getLang();
 
 /* main map */
 var map = L.map('map').setView([40.0758302,-1], 6);
@@ -28,7 +29,7 @@ L.tileLayer('https://{s}.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 
 // Fetch, process and display geoJSON.
 jQuery.when(
-	jQuery.getJSON("http://crimenesdeodio.info/wp-content/export/hatecrimes.js", {})   
+	jQuery.getJSON("/getjson", {})   
 	//jQuery.getJSON("./hatecrimes.js", {})   
 	.done (function( hatecrimes ) {
 
@@ -69,14 +70,14 @@ function loadRegisters(json) {
 			var date = dateFormat(register.date, "d 'de' mmmm yyyy");
 			register.year = dateFormat(register.date, "yyyy");
 
-			var popupText = "<h2>"+register.title+"<br>"+date+"<br>"+register.city+"</h2>";
+			var popupText = "<h2>"+register.title+".<br>"+date+".<br>"+register.city+"</h2>";
 
 			var desc = register.description;
 			desc = desc.substr(0, 400);
 			desc = register.description.substr(0, Math.min(desc.length, desc.lastIndexOf(". ")+1));
 			popupText += "<p>"+desc+"</p>";
-			popupText += "<p><strong>Tipología:</strong> "+register.category+'</p>';
-			popupText += "<p><a target='_parent' href='http://crimenesdeodio.info/index.php?p="+register.id+"'>más información</a></p>";
+			popupText += "<p><strong>"+getLangString("type")+":</strong> "+register.category+'</p>';
+			popupText += "<p><a target='_parent' href='/index.php?p="+register.id+"'>"+getLangString("more")+"</a></p>";
 
 			/*var marker = L.circleMarker(new L.LatLng( register.latitude, register.longitude ), {
 				radius: 8,
@@ -101,8 +102,8 @@ function loadRegisters(json) {
 
 			// canary islands
 			if (register.longitude < -10) {
-				var popupText = "<h2>"+register.title+"<br>"+date+"<br>"+register.city+"</h2>";
-				popupText += "<p><a target='_parent' href='http://crimenesdeodio.info/index.php?p="+register.id+"'>más información</a></p>";
+				var popupText = "<h2>"+register.title+".<br>"+date+".<br>"+register.city+"</h2>";
+				popupText += "<p><a href='/index.php?p="+register.id+"'>"+getLangString("more")+"</a></p>";
 
 				/*var marker = L.circleMarker(new L.LatLng( register.latitude, register.longitude ), {
 					radius: 8,
@@ -184,8 +185,8 @@ function initFilter() {
 	});
 
 	//add feminicidio & antisemitismo
-	jQuery('#filter').append('<a target="_blank" href="http://www.informeraxen.es/tag/antisemitismo/" class="cb cb-cat" style="color:#fff;background-color:#874321;margin-left:21px;">Antisemitismo</a></br>');
-	jQuery('#filter').append('<a target="_blank" href="http://www.feminicidio.net/menu-feminicidio-informes-y-cifras" class="cb cb-cat" style="color:#fff;background-color:#a00;margin-left:21px;">Misoginia</a></br></br>');
+	jQuery('#filter').append('<a target="_blank" href="http://www.informeraxen.es/tag/antisemitismo/" class="cb cb-cat" style="color:#fff;background-color:#874321;margin-left:21px;">'+getLangString("Antisemitism")+'</a></br>');
+	jQuery('#filter').append('<a target="_blank" href="http://www.feminicidio.net/menu-feminicidio-informes-y-cifras" class="cb cb-cat" style="color:#fff;background-color:#a00;margin-left:21px;">'+getLangString("Misogyny")+'</a></br></br>');
 
 	// category changed
 	jQuery('.cb-cat').on('change', function(e) {
@@ -198,7 +199,7 @@ function initFilter() {
 		showCats();
 	});
 
-	jQuery('#filter').append('<p><button type="button" onclick="showAll();">Todos</button> <button type="button" onclick="showNone();">Ninguno</button></p>');
+	jQuery('#filter').append('<p><button type="button" onclick="showAll();">'+getLangString('All')+'</button> <button type="button" onclick="showNone();">'+getLangString('None')+'</button></p>');
 }
 
 function showCats() {
@@ -226,7 +227,6 @@ function showNone() {
 
 // show only this category
 function showCat(cats) {
-	console.log("show cats:", cats, categories);
 	markers.clearLayers();
 	cats.forEach(function(cat,i){
 		categories.forEach(function(obj,j){
@@ -268,4 +268,53 @@ function sortOn(key) {
    if (a[key] < b[key]) return -1;
    return 0;
   }
+}
+
+//get language from URL
+function getLang() {
+	var language = "es";
+	var loc = window.location.href;
+	var url = "crimenesdeodio.info"
+	var pos1 = loc.indexOf(url);
+	loc = loc.substring(pos1+url.length+1);
+	loc = loc.split("/");
+	if (loc[0] == "en" || loc[0] == "ca") {
+		language = loc[0];
+	}
+	return language;
+}
+
+function getLangString(str) {
+	if (lang == "en") {
+		return str;
+	} else {
+		return translations[str][lang];
+	}
+}
+
+var translations = {
+	"All": {
+		"es": "Todos",
+		"ca": "Tots" 
+	},
+	"None": {
+		"es": "Ninguno",
+		"ca": "Ningú" 
+	},
+	"more": {
+		"es": "más información",
+		"ca": "mes informació"
+	},
+	"type": {
+		"es": "Tipología",
+		"ca": "Tipologia"
+	},
+	"Antisemitism": {
+		"es": "Antisemitismo",
+		"ca": "Antisemitisme"
+	},
+	"Misogyny": {
+		"es": "Misoginia",
+		"ca": "Misogínia"
+	}
 }
