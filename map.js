@@ -2,8 +2,8 @@ var categories = [];
 var markers = new L.MarkerClusterGroup({spiderfyDistanceMultiplier: 2.2, maxClusterRadius: 40, disableClusteringAtZoom: 12});
 var markers2 = new L.LayerGroup();
 var colors = {"antisemitismo": "#874321", "aporofobia": "#80a51f", "homofobia": "#5e457b", "intolerancia-criminal": "#4cbb81", "islamofobia": "#b5bb83", "disfobia": "#fab909", "odioideologico": "#ee229c", "racismoxenofobia": "#761c2c", "romafobia": "#2f2d66", "transfobia": "#273d08", "futbol": "#941a59"};
-var id = 'gkogler.l91ko9dl';
-var token = 'pk.eyJ1IjoiZ2tvZ2xlciIsImEiOiJSQ1Nld2NrIn0.yW2DR2Lp2NS1xPJsOddW9Q';
+var id = "mapadelodi.f6e57a2f";
+var token = "pk.eyJ1IjoibWFwYWRlbG9kaSIsImEiOiI1M2ZkODMzYzJkYTcwMmU0MDA5YmQyNTMyYTEyOGJjNCJ9.Kr-J9A2klHClDqTlvR8fTA";
 var lang = getLang();
 
 /* main map */
