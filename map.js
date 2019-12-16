@@ -77,7 +77,7 @@ function loadRegisters(json) {
 			desc = register.description.substr(0, Math.min(desc.length, desc.lastIndexOf(". ")+1));
 			popupText += "<p>"+desc+"</p>";
 			popupText += "<p><strong>"+getLangString("type")+":</strong> "+register.category+'</p>';
-			popupText += "<p><a target='_parent' href='/index.php?p="+register.id+"'>"+getLangString("more")+"</a></p>";
+			popupText += "<p><a target='_parent' href='/"+getLang()+"/?p="+register.id+"'>"+getLangString("more")+"</a></p>";
 
 			/*var marker = L.circleMarker(new L.LatLng( register.latitude, register.longitude ), {
 				radius: 8,
