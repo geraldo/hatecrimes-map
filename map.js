@@ -1,7 +1,7 @@
 var categories = [];
 var markers = new L.MarkerClusterGroup({spiderfyDistanceMultiplier: 2.2, maxClusterRadius: 40, disableClusteringAtZoom: 12});
 var markers2 = new L.LayerGroup();
-var colors = {"antisemitismo": "#874321", "aporofobia": "#80a51f", "homofobia": "#5e457b", "intolerancia-criminal": "#4cbb81", "islamofobia": "#b5bb83", "disfobia": "#fab909", "odioideologico": "#ee229c", "racismoxenofobia": "#761c2c", "romafobia": "#2f2d66", "transfobia": "#273d08", "futbol": "#941a59"};
+var colors = {"antisemitismo": "#874321", "aporofobia": "#80a51f", "homofobia": "#5e457b", "otros": "#4cbb81", "islamofobia": "#b5bb83", "disfobia": "#fab909", "odioideologico": "#ee229c", "racismoxenofobia": "#761c2c", "romafobia": "#2f2d66", "transfobia": "#273d08", "futbol": "#941a59", "disfobia": "#61873F", "romafobia": "#3C3C3B"};
 var id = "mapadelodi.f6e57a2f";
 var token = "pk.eyJ1IjoibWFwYWRlbG9kaSIsImEiOiI1M2ZkODMzYzJkYTcwMmU0MDA5YmQyNTMyYTEyOGJjNCJ9.Kr-J9A2klHClDqTlvR8fTA";
 var lang = getLang();
@@ -29,7 +29,7 @@ L.tileLayer('https://{s}.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 
 // Fetch, process and display geoJSON.
 jQuery.when(
-	jQuery.getJSON("/getjson", {})   
+	jQuery.getJSON("/dev/"+getLang()+"/geojson", {})   
 	//jQuery.getJSON("./hatecrimes.js", {})   
 	.done (function( hatecrimes ) {
 
@@ -77,18 +77,10 @@ function loadRegisters(json) {
 			desc = register.description.substr(0, Math.min(desc.length, desc.lastIndexOf(". ")+1));
 			popupText += "<p>"+desc+"</p>";
 			popupText += "<p><strong>"+getLangString("type")+":</strong> "+register.category+'</p>';
-			popupText += "<p><a target='_parent' href='/"+getLang()+"/?p="+register.id+"'>"+getLangString("more")+"</a></p>";
+			popupText += "<p><a target='_parent' href='/dev/"+getLang()+"/?p="+register.id+"'>"+getLangString("more")+"</a></p>";
 
-			/*var marker = L.circleMarker(new L.LatLng( register.latitude, register.longitude ), {
-				radius: 8,
-				color: cat.color,
-				fillColor: cat.color,
-				weight: 1,
-				opacity: 1,
-				fillOpacity: 0.8
-			});*/
 			var marker = L.marker(new L.LatLng( register.latitude, register.longitude ), {
-				icon: cat.icon,
+				icon: cats[0].icon,
 				title: register.title
 			});
 			marker.bindPopup(popupText);
@@ -103,16 +95,8 @@ function loadRegisters(json) {
 			// canary islands
 			if (register.longitude < -10) {
 				var popupText = "<h2>"+register.title+".<br>"+date+".<br>"+register.city+"</h2>";
-				popupText += "<p><a href='/index.php?p="+register.id+"'>"+getLangString("more")+"</a></p>";
+				popupText += "<p><a href='/dev/index.php?p="+register.id+"'>"+getLangString("more")+"</a></p>";
 
-				/*var marker = L.circleMarker(new L.LatLng( register.latitude, register.longitude ), {
-					radius: 8,
-					color: cat.color,
-					fillColor: cat.color,
-					weight: 1,
-					opacity: 1,
-					fillOpacity: 0.8
-				});*/
 				var marker = L.marker(new L.LatLng( register.latitude, register.longitude ), {
 					icon: cats[0].icon,
 					title: register.title
@@ -160,7 +144,7 @@ function registerCategory(catTitle, catSlug) {
 			color: colors[catSlug],
 			layer: new L.LayerGroup(),
 			icon: new L.icon({
-				iconUrl: '/wp-content/plugins/hatecrimes-map/images/'+catSlug+'.png',
+				iconUrl: '/dev/wp-content/plugins/hatecrimes-map/images/'+catSlug+'.png',
 				iconSize:     [24, 32],
 				iconAnchor:   [12, 16],
 				popupAnchor:  [0, -16],
@@ -185,7 +169,7 @@ function initFilter() {
 	});
 
 	//add feminicidio & antisemitismo
-	jQuery('#filter').append('<a target="_blank" href="http://www.informeraxen.es/tag/antisemitismo/" class="cb cb-cat" style="color:#fff;background-color:#874321;margin-left:21px;">'+getLangString("Antisemitism")+'</a></br>');
+	//jQuery('#filter').append('<a target="_blank" href="http://www.informeraxen.es/tag/antisemitismo/" class="cb cb-cat" style="color:#fff;background-color:#874321;margin-left:21px;">'+getLangString("Antisemitism")+'</a></br>');
 	jQuery('#filter').append('<a target="_blank" href="http://www.feminicidio.net/menu-feminicidio-informes-y-cifras" class="cb cb-cat" style="color:#fff;background-color:#a00;margin-left:21px;">'+getLangString("Misogyny")+'</a></br></br>');
 
 	// category changed
@@ -274,7 +258,7 @@ function sortOn(key) {
 function getLang() {
 	var language = "es";
 	var loc = window.location.href;
-	var url = "crimenesdeodio.info"
+	var url = "crimenesdeodio.info/dev/"
 	var pos1 = loc.indexOf(url);
 	loc = loc.substring(pos1+url.length+1);
 	loc = loc.split("/");
